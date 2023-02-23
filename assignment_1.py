@@ -5,10 +5,14 @@ import time
 import sys
 import random
 import string
-
+import urllib.request
 from dateutil import parser
 
+
+#######################################################################
 #EC2 instance
+#######################################################################
+
 ec2 = boto3.resource('ec2')
 #user input instance name
 instance_name = input("Instance name: ")
@@ -45,6 +49,7 @@ instance = ec2.Instance(instanceID)
 print("waiting for instance to run...")
 instance.wait_until_running()
 print("Instance state: Running", instance_name, instanceID)
+
 instance.reload()
 
 # function to return the Public Ip Address
@@ -58,23 +63,22 @@ def get_public_ip(instanceID):
 			return instance.get("PublicIpAddress")
 
 public_add = get_public_ip(instanceID)
-
-
-
 instance.reload()
+
+#######################################################################
 #S3 bucket:
+#######################################################################
 
 #randomly selects 4 lowercase letter and digits
-digits = random.choices(string.digits, k=4)
-letters = random.choices(string.ascii_lowercase, k= 4)  
+digits = random.choices(string.digits, k=3)
+letters = random.choices(string.ascii_lowercase, k= 3)  
 s3 = boto3.resource("s3")
-
-#shuffles the letters and digits
-name= random.sample(digits + letters, 8)
-
-bucket_name = "s3" + ''.join(name)
+#shuffles the letters and digits and generates a random bucket name
+name= random.sample(digits + letters, 6)
+bucket_name = "jbloggs" + ''.join(name)
 print("Unique bucket name generated: " + bucket_name)
 
+#create bucket
 s3.create_bucket(Bucket=bucket_name)
 print("S3 Bucket created:", bucket_name)
 
@@ -89,7 +93,6 @@ response = bucket_website.put(WebsiteConfiguration=website_configuration)
 
 
 #print to terminal
-
 print("Upload an index.html file to test it works!" )
 print("waiting for the web browser to open.. please wait")
 time.sleep(30)
