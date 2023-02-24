@@ -1,4 +1,4 @@
-<img src=" "https://github.com/emanlapaz/Devops/blob/master/images/devops.jpg" width=100% height=100%>
+<img src="https://github.com/emanlapaz/Devops/blob/master/images/devops.jpg" width=100% height=100%>
 
 This code is a Python script that uses the Boto3 library to create an Amazon Elastic Compute Cloud (EC2) instance and an Amazon Simple Storage Service (S3) bucket in the user's Amazon Web Services (AWS) account. It also downloads an image from a URL, uploads it to the created S3 bucket, and opens the image in the user's default web browser.
 
