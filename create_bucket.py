@@ -56,12 +56,6 @@ def upload_to_bucket():
     print("Amazon S3 URL for the uploaded image:", uploaded_url)
 
 
-website_configuration = {
-    'ErrorDocument': {'Key': 'error.html'},
-    'IndexDocument': {'Suffix':'index.html'},
-}
 
-bucket_website = s3.BucketWebsite(bucket_name)
-response = bucket_website.put(WebsiteConfiguration=website_configuration)
 
 upload_to_bucket()
