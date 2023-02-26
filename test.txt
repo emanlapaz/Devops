@@ -1,0 +1,2 @@
+EC2 instance URL: ec2 test
+S3 bucket URL: http://{bucket_name}.s3-website-{region}.amazonaws.com

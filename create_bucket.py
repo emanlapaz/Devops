@@ -55,7 +55,21 @@ def upload_to_bucket():
     #print the uploaded url
     print("Amazon S3 URL for the uploaded image:", uploaded_url)
 
+try:
+	#website configuration
+	website_configuration = {
+		'ErrorDocument': {'Key': 'error.html'},
+		'IndexDocument': {'Suffix':'index.html'},
+	}
 
+	bucket_website = s3.BucketWebsite(bucket_name)
+	response = bucket_website.put(WebsiteConfiguration=website_configuration)
+except:
+	print("Error: Web configuration")
 
 
 upload_to_bucket()
+
+with open('eugeneurls.txt', 'w') as f:
+			f.write(f'EC2 instance URL: {ec2_url}\n')
+			f.write(f'S3 bucket URL: {s3_url}\n')

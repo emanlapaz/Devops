@@ -33,31 +33,7 @@ try:
 			UserData="""#!/bin/bash
 						yum install httpd -y
 						systemctl enable httpd
-						systemctl start httpd
-						echo '<html>' > index.html
-						echo 'Hello! This is my deployed website: ' >> index.html
-						echo '<br>' >> index.html
-						echo 'Instance Name: ' >> index.html
-						curl http://169.254.169.254/latest/meta-data/hostname >> index.html
-						echo '<br>' >> index.html
-						echo 'Instance ID: ' >> index.html
-						curl http://169.254.169.254/latest/meta-data/instance-id >> index.html
-						echo '<br>' >> index.html
-						echo 'Instance Type: ' >> index.html
-						curl http://169.254.169.254/latest/meta-data/instance-type >> index.html
-						echo '<br>' >> index.html
-						echo 'AMI ID: ' >> index.html
-						curl http://169.254.169.254/latest/meta-data/ami-id >> index.html
-						echo '<br>' >> index.html
-						echo 'Public IP address: ' >> index.html
-						curl http://169.254.169.254/latest/meta-data/public-ipv4 >> index.html
-						echo '<br>' >> index.html
-						echo 'Private IP address: ' >> index.html
-						curl http://169.254.169.254/latest/meta-data/local-ipv4 >> index.html
-						echo '<br>' >> index.html
-						echo 'URLs saved in eugeneurls.txt file'
-						cp index.html /var/www/html/index.html"""
-						,
+						systemctl start httpd""",
 
 			TagSpecifications=[
 				{
