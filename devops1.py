@@ -24,13 +24,17 @@ ec2 = boto3.resource('ec2')
 instance_name = "EC2" + ''.join(name)
 print(f"Random EC2 instance name tag generated: {instance_name}\n")
 
+ami_id = 'ami-0dfcb1ef8550277af'
+
+"""
 # get the latest AMI id using Filters and sorted
 print("Checking for the latest AMI ID\n")
 filters = [{'Name': 'name', 'Values': ['amzn2-ami-hvm-*']}]
 images = list(ec2.images.filter(Filters=filters).all())
 latest_image = sorted(images, key=lambda x: x.creation_date, reverse=True)[0]
 ami_id = latest_image.id
-print(f"The latest Amazon Linux 2 AMI ID is: {ami_id}\n")
+print(f"Amazon Linux 2 AMI ID: {ami_id}\n")
+"""
 
 # creates a new instance
 try:
@@ -86,8 +90,8 @@ try:
 	print(f"{instance_name} is Running\n")
 	
 
-except:
-	print("Error: unable to create Instance\n")
+except Exception as e:
+    print('Error: unable to create Instance', str(e))
 
 instance.reload()
 
@@ -110,8 +114,8 @@ try:
 	time.sleep(30)
 	instance.reload()
 
-except: 
-	print("Error: Unable to open web browser\n")
+except Exception as e:
+    print('Error: Unable to open web browser', str(e))
 
 print("EC2 Instance created successfully\n")
 
@@ -132,9 +136,9 @@ print(f"Unique bucket name generated: {bucket_name}\n")
 try:
 	s3.create_bucket(Bucket=bucket_name)
 	print(f"S3 Bucket created: {bucket_name}\n")
-except:
-	print ("Error: unable to create s3 bucket")
-
+	
+except Exception as e:
+    print('Error: unable to create s3 bucket', str(e))
 
 
 # url to download image
@@ -154,8 +158,6 @@ try:
 		s3 = boto3.client('s3')
 		s3_bucket = bucket_name
 		
-		
-
 		# upload the image to the bucket and make it public
 		s3.upload_file(wit_logo, s3_bucket, wit_logo, ExtraArgs={'ContentType': 'image/jpeg','ACL':'public-read'})
 		#s3.put_object_acl(Bucket=s3_bucket, Key=wit_logo , ACL='public-read')
@@ -170,13 +172,10 @@ try:
 			f.write(f'<img src="{object_url}">')
 		print("wit logo object bucket url added to index.html\n")
 		
-
 	upload_to_bucket()
 
-except: 
-	print("Error: Failed to upload to bucket")
-
-
+except Exception as e:
+    print('Error: Failed to upload to bucket', str(e))
 
 print(f"S3 Bucket {bucket_name}created successfully\n")
 
@@ -196,8 +195,9 @@ try:
 		
 		print(f"{s3_url} added to eugeneurls.txt\n")
 		print(f"{instance_url} added to eugeneurls.txt\n")
-except:
-	print("Error: Unable to write to file")
+
+except Exception as e:
+    print('Error: Unable to write to file', str(e))
 
 try:
 	#website configuration
@@ -209,9 +209,11 @@ try:
 
 	bucket_website = s3.BucketWebsite(bucket_name)
 	response = bucket_website.put(WebsiteConfiguration=website_configuration)
-except:
-	print("Error: Web configuration")
 
+
+except Exception as e:
+    print('Error: Web configuration', str(e))
+    
 #opening web browsers
 try:
 	print(f"Opening EC2 website at {instance_url}\n")
@@ -219,8 +221,10 @@ try:
 	print(f"Opening S3 website at {s3_url}\n")
 	webbrowser.open_new_tab(s3_url)
 	print("Web sites open\n")
-except:
-	print("Error: Failed to open websites\n")
+
+except Exception as e:
+    print('Error: Failed to open websites', str(e))
+    
 ####################################################################
 #Cloudwatch
 ####################################################################
@@ -240,18 +244,18 @@ if proceed.lower() == "yes":
     print(f"Starting CLOUDWATCH for {instance_name} {instanceID}\n")
     print("wait for 6 minutes to ensure data collection\n")
     time.sleep(360)  
-    # Retrieve CPU utilization metric
+    #CPU utilization metric 
     cpu_iterator = cloudwatch.metrics.filter(Namespace='AWS/EC2',
                                               MetricName='CPUUtilization',
                                               Dimensions=[{'Name':'InstanceId', 'Value': instanceID}])
 
-    cpu_metric = list(cpu_iterator)[0]    # extract first (only) element
+    cpu_metric = list(cpu_iterator)[0]
     cpu_response = cpu_metric.get_statistics(StartTime = datetime.utcnow() - timedelta(minutes=5),   # 5 minutes ago
                                               EndTime=datetime.utcnow(),                              # now
                                               Period=300,                                             # 5 min intervals
                                               Statistics=['Average'])
 
-    # Retrieve NetworkIn metric
+    # NetworkIn metric
     networkin_iterator = cloudwatch.metrics.filter(Namespace='AWS/EC2',
                                                     MetricName='NetworkIn',
                                                     Dimensions=[{'Name':'InstanceId', 'Value': instanceID}])
@@ -262,7 +266,7 @@ if proceed.lower() == "yes":
                                                           Period=300,                                             # 5 min intervals
                                                           Statistics=['Average'])
 
-    # Retrieve NetworkOut metric
+    #NetworkOut metric
     networkout_iterator = cloudwatch.metrics.filter(Namespace='AWS/EC2',
                                                      MetricName='NetworkOut',
                                                      Dimensions=[{'Name':'InstanceId', 'Value': instanceID}])
@@ -282,7 +286,7 @@ if proceed.lower() == "yes":
 elif proceed.lower() == "no":
     print("Exiting program.")
 else:
-    print("Please answer with 'yes' or 'no'.")
+    print("Exiting Program: Please answer with 'yes' or 'no'.")
 
 
 
