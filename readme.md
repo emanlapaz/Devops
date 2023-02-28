@@ -7,3 +7,15 @@ The script starts by importing necessary libraries such as boto3, webbrowser, ti
 After the EC2 instance is created, the script gets the public IP address of the instance and opens the web browser to display the Apache HTTP server default page. The script then creates an S3 bucket by randomly generating a unique name, uploads an image to the bucket, and sets the object ACL to public-read. It also creates an index.html file and sets the website configuration for the bucket to use the index.html file as the default document and error.html file as the error document.
 
 Overall, this script demonstrates how to use the Boto3 library to create and manage AWS resources such as EC2 instances and S3 buckets.
+
+
+References:
+    Boto3 EC2 Documentation: https://boto3.amazonaws.com/v1/documentation/api/latest/reference/services/ec2.html - This is the official Boto3 documentation for the EC2 service. It provides detailed information on how to use the service and its methods.
+
+    EC2 Image Filters: https://docs.aws.amazon.com/AWSEC2/latest/UserGuide/finding-an-ami.html - This AWS documentation provides more information on EC2 Image Filters and how they can be used to search for Amazon Machine Images (AMIs).
+
+    Python's lambda functions: https://docs.python.org/3/reference/expressions.html#lambda - This is Python's documentation on lambda functions, which are anonymous functions that can be used as arguments to higher-order functions.
+
+    Sorting lists in Python: https://docs.python.org/3/howto/sorting.html - This page explains how to sort lists in Python, which is used in the code to sort a list of EC2 images by their creation date.
+
+    The EC2 Image class in Boto3: https://boto3.amazonaws.com/v1/documentation/api/latest/reference/services/ec2.html#image - This is the official documentation for the Image class in Boto3, which is used to represent EC2 images. It provides information on the attributes and methods of the class.

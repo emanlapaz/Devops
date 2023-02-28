@@ -13,12 +13,14 @@ print("Create EC2 Instance")
 ec2 = boto3.resource('ec2')
 #user input instance name
 instance_name = input("Instance name: ")
-
+ami_id = 'ami-0dfcb1ef8550277af'
+"""
 # get the latest AMI id using Filters and sorted
 filters = [{'Name': 'name', 'Values': ['amzn2-ami-hvm-*']}]
 images = list(ec2.images.filter(Filters=filters).all())
 latest_image = sorted(images, key=lambda x: x.creation_date, reverse=True)[0]
 ami_id = latest_image.id
+"""
 print(f"The latest Amazon Linux 2 AMI ID is: {ami_id}")
 
 # creates a new instance
