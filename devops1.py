@@ -1,4 +1,6 @@
 #!/usr/bin/env python3
+#eugenio_manlapaz
+
 import boto3
 import webbrowser
 import time
@@ -8,6 +10,8 @@ import string
 import urllib.request
 from dateutil import parser
 from datetime import datetime, timedelta
+import os
+import subprocess
 
 #randomly selects 4 lowercase letter and digits
 digits = random.choices(string.digits, k=3)
@@ -18,14 +22,16 @@ name= random.sample(digits + letters, 6)
 #######################################################################
 #EC2 INSTANCE
 #######################################################################
-print("CREATE EC2 INSTANCE\n")
+print("CREATING EC2 INSTANCE\n")
 ec2 = boto3.resource('ec2')
 #creates a random instance name tag
 instance_name = "EC2" + ''.join(name)
 print(f"Random EC2 instance name tag generated: {instance_name}\n")
 
 ami_id = 'ami-0dfcb1ef8550277af'
-
+keypair = 'kp'
+security_name = 'launch-wizard-1'
+inst_type = 't2.nano'
 """
 # get the latest AMI id using Filters and sorted
 print("Checking for the latest AMI ID\n")
@@ -42,9 +48,9 @@ try:
 			ImageId=ami_id,
 			MinCount=1,
 			MaxCount=1,
-			InstanceType='t2.nano',
-			KeyName='kp',
-			SecurityGroups=['launch-wizard-1'],
+			InstanceType=inst_type,
+			KeyName=keypair,
+			SecurityGroups=[security_name],
 			UserData="""
 						#!/bin/bash
 						yum install httpd -y
@@ -117,12 +123,12 @@ try:
 except Exception as e:
     print('Error: Unable to open web browser', str(e))
 
-print("EC2 Instance created successfully\n")
+print(F"EC2 Instance {instanceID} created successfully\n")
 
 #######################################################################
 #S3 BUCKET:
 #######################################################################
-print("CREATE S3 BUCKET\n")
+print("CREATING S3 BUCKET\n")
 
 region = 'us-east-1'
 s3 = boto3.resource("s3")
@@ -143,9 +149,10 @@ except Exception as e:
 
 # url to download image
 url_src = "http://devops.witdemo.net/logo.jpg"
-output_path = "/home/eugene/Devops/images/image.jpg"
+output_path = "/home/eugene/Devops/image.jpg"
 wit_logo = 'image.jpg'
 index = 'index.html'
+object_url = f'https://{bucket_name}.s3.amazonaws.com/{wit_logo}'
 # downloads the file
 urllib.request.urlretrieve(url_src, output_path)
 print(f"image downloaded from: {url_src}\n")
@@ -156,22 +163,22 @@ try:
 	def upload_to_bucket():
 		# initialize S3 client
 		s3 = boto3.client('s3')
-		s3_bucket = bucket_name
 		
 		# upload the image to the bucket and make it public
-		s3.upload_file(wit_logo, s3_bucket, wit_logo, ExtraArgs={'ContentType': 'image/jpeg','ACL':'public-read'})
-		#s3.put_object_acl(Bucket=s3_bucket, Key=wit_logo , ACL='public-read')
+		s3.upload_file(wit_logo, bucket_name, wit_logo, ExtraArgs={'ContentType': 'image/jpeg','ACL':'public-read'})
 		print(f"uploaded: {wit_logo}\n")
-		s3.upload_file(index, s3_bucket, index, ExtraArgs={'ContentType': 'text/html', 'ACL':'public-read'})
-		#s3.put_object_acl(Bucket=s3_bucket, Key=index , ACL='public-read')
+		#creates index.html if file not found and write the object url in the html file
+		if not os.path.isfile('index.html'):
+			with open('index.html', 'w') as f:
+				f.write(f'<img src="{object_url}">')
+
+		s3.upload_file(index, bucket_name, index, ExtraArgs={'ContentType': 'text/html', 'ACL':'public-read'})
 		print(f"uploaded: {index}\n")
-
-		object_url = f'https://{s3_bucket}.s3.amazonaws.com/{wit_logo}'
-
-		with open('index.html', 'w') as f:
-			f.write(f'<img src="{object_url}">')
-		print("wit logo object bucket url added to index.html\n")
 		
+		
+		
+
+	print("wit logo object bucket url added to index.html\n")
 	upload_to_bucket()
 
 except Exception as e:
@@ -187,14 +194,16 @@ print(f"S3 Bucket {bucket_name}created successfully\n")
 instance_url = f'http://{public_add}'
 s3_url = f"http://{bucket_name}.s3-website-{region}.amazonaws.com"
 
-#add the urls to a txt file name eugeneurls
+#add the urls to a txt file named eugeneurls
 try:
-	with open('eugeneurls.txt', 'w') as f:
-		f.write(f'EC2 instance URL: {instance_url}\n')
-		f.write(f'S3 bucket URL: {s3_url}\n')
+	#creates eugeneurls if file is not found and writes the instance and s3 url
+	if not os.path.isfile('eugeneurls.txt'):
+		with open('eugeneurls.txt', 'w') as f:
+			f.write(f'EC2 instance URL: {instance_url}\n')
+			f.write(f'S3 bucket URL: {s3_url}\n')
 		
-		print(f"{s3_url} added to eugeneurls.txt\n")
-		print(f"{instance_url} added to eugeneurls.txt\n")
+	print(f"{s3_url} added to eugeneurls.txt\n")
+	print(f"{instance_url} added to eugeneurls.txt\n")
 
 except Exception as e:
     print('Error: Unable to write to file', str(e))
@@ -225,12 +234,25 @@ try:
 except Exception as e:
     print('Error: Failed to open websites', str(e))
     
+
+###################################################################
+#Monitor.sh
+###################################################################
+try:
+	cmd_1 = f"ssh -i /path/to/your/{keypair}.pem ec2-user@{public_add} '/bin/bash -s' < /home/eugene/Devops/monitor.sh"
+	cmd_2 = f"scp -i {keypair}.pem myfile ec2-user@{public_add}:."
+	output = subprocess.check_output(cmd_1, cmd_2, shell=True)
+	print(output.decode('utf-8'))
+except Exception as e:
+    print('Error: Monitoring failed', str(e))
+
+
 ####################################################################
 #Cloudwatch
 ####################################################################
-
 print("WARNING: Cloudwatch takes 6 minutes to ensure data collection for new Instances")
 proceed = input("Do you want to proceed with CloudWatch monitoring? (yes/no)\n ")
+
 cloudwatch = boto3.resource('cloudwatch')
 ec2 = boto3.resource('ec2')
 instance = ec2.Instance(instanceID)
@@ -286,7 +308,8 @@ if proceed.lower() == "yes":
 elif proceed.lower() == "no":
     print("Exiting program.")
 else:
-    print("Exiting Program: Please answer with 'yes' or 'no'.")
+    print("Invalid input: Exiting Program")
+    sys.exit()
 
 
 
