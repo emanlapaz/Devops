@@ -17,10 +17,7 @@ new_instances = ec2.create_instances(
 		KeyName='kp',
 		SecurityGroups=['launch-wizard-1'],
 		UserData=
-			"""#!/bin/bash
-			yum install httpd -y
-			systemctl enable httpd
-			systemctl start httpd""",
+			""" """,
 		TagSpecifications=[
 			{
 				'ResourceType': 'instance',
@@ -32,18 +29,8 @@ instanceID = (new_instances[0].id)
 instance = ec2.Instance(instanceID)
 instance.wait_until_running()
 
-# function to return the Public Ip Address
-#source: https://www.learnaws.org/2020/12/16/aws-ec2-boto3-ultimate-guide/
-def get_public_ip(instanceID):
-	ec2_client = boto3.client('ec2')
-	reservations = ec2_client.describe_instances(InstanceIds=[instanceID]).get("Reservations")
-
-	for reservation in reservations:
-		for instance in reservation['Instances']:
-			return instance.get("PublicIpAddress")
-
-public_add = get_public_ip(instanceID)
-
+#public_add = get_public_ip(instanceID)
+ipaddress = instance.public_ip_address
 #S3 bucket:
 
 #randomly selects 4 lowercase letter and digits
@@ -68,11 +55,11 @@ response = bucket_website.put(WebsiteConfiguration=website_configuration)
 
 #print to terminal
 print("Your instance is up and running")
-print ("New instance created:"+instanceID, "Public Address:",public_add)
+print ("New instance created:"+instanceID, "Public Address:",ipaddress)
 print("Unique bucket name: " + bucket_name)
 print("Upload an index.html file to test it works!" )
 time.sleep(30)
-webbrowser.open_new_tab(public_add)
+webbrowser.open_new_tab(ipaddress)
 print("Web Browser Open")
 
 

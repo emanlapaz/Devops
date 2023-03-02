@@ -1,12 +1,20 @@
 import boto3
 
-ec2 = boto3.resource('ec2')
+client = boto3.client('ec2')
 
-image_id = 'ami-0dfcb1ef8550277af'
+response = client.describe_images(
+    Filters=[
+        {'Name': 'name', 'Values': ['amzn2-ami-hvm-*-x86_64-gp2']},
+        {'Name': 'owner-id', 'Values': ['amazon']},
+        {'Name': 'state', 'Values': ['available']}
+    ],
+    DryRun=False,
+    MaxResults=1000 # increase the number of results to retrieve
+)
 
-image = ec2.Image(image_id)
+images = response['Images']
+images.sort(key=lambda x: x['CreationDate'], reverse=True)
 
-if not image:
-    print(f"No matching AMI found with ID {image_id}")
-else:
-    print(f"Selected AMI: {image.id}")
+ami_id = images[0]['ImageId']
+
+print("The latest Amazon Linux 2 AMI ID is: ", ami_id)

@@ -1,2 +1,2 @@
-EC2 instance URL: http://3.92.49.153
-S3 bucket URL: http://jbloggsi6fm87.s3-website-us-east-1.amazonaws.com
+EC2 instance URL: http://52.203.26.143
+S3 bucket URL: http://jbloggs0pn73a.s3-website-us-east-1.amazonaws.com
